@@ -25,7 +25,7 @@ public class Me_book {
 	private HashMap<String, Friend> friend_map = new HashMap<>();
 	private HashMap<String, String> name_informations = new HashMap<>();
 
-	static Me_book me_book = new Me_book();
+	static Me_book me_book = new Me_book();// 因为只是作为演示所以只需要创建一个单例对象，当程序重新运行时所有信息将会被重置（但是所谓的shutdown不会～～）
 
 	void launch() {
 		if (!isOpen) {
@@ -68,18 +68,30 @@ public class Me_book {
 
 	void shutdown() {
 		if (isOpen) {
-			System.out.println("SHUTING DOWN PLEASE WAIT 20 SECONDS");
-			long start = System.currentTimeMillis();
-			for (int i = 1; i <= 20; ++i) {
-				try {
-					Thread.sleep(1000);
-				} catch (Exception e) {
-					System.out.println("SHIT");
+			while (true) {
+				System.out.println("SURE TO SHUTDOWN (y/n)");
+				String confirm = sca.nextLine();
+				if (confirm.equals("y")) {
+					System.out.println("SHUTING DOWN PLEASE WAIT 20 SECONDS");
+					long start = System.currentTimeMillis();
+					for (int i = 1; i <= 20; ++i) {
+						try {
+							Thread.sleep(1000);
+						} catch (Exception e) {
+							System.out.println("SHIT");
+						}
+						System.out.println(i + " SECOND PASSED");
+					}
+					isOpen = !isOpen;
+					System.out.println("ME BOOK HAS BEEN SHUTDOWN");
+					return;
+				} else if (confirm.equals("n")) {
+					System.out.println("DID NOT SHUTDOWN");
+					return;
+				} else {
+					System.out.println("NOT FOUND");
 				}
-				System.out.println(i + " SECOND PASSED");
 			}
-			isOpen = !isOpen;
-			System.out.println("ME BOOK HAS BEEN SHUTDOWN");
 		} else {
 			System.out.println("ALREADY SHUTDOWN");
 		}
@@ -87,39 +99,47 @@ public class Me_book {
 
 	void add() {
 		if (isOpen) {
-			System.out.print("NAME ");
-			String name = sca.nextLine();
-			if (!name_list.contains(name)) {
-				name_list.add(name);
-				System.out.print("INFORMATION ");
-				String information = sca.nextLine();
-				name_informations.put(name, information);
-
-				friend_map.put(name, new Friend(name)); // 这一步很关键,形成了依赖关系
-
-				if (information.matches("\\d+")) { // 可以自动识别用户输入的信息是电话号码还是邮箱
-					System.out.println("CLASSIFIED INTO PHONE NUMBER");
-				} else if (information.matches("[\\w\\.]+@[\\w\\.]+\\.\\w+")) {
-					System.out.println("CLASSIFIED INTO E-MAIL");
-				} else {
-					System.out.println("UNCLASSIFIED");
+			while (true) {
+				System.out.print("NAME ");
+				String temp = sca.nextLine();
+				if (temp.equals("help")) {
+					System.out.println("\"back\" TO BACKWARD DASHBOARD");
+					continue;
 				}
-				// else if (information.matches("[a-zA-Z\\.,?!~:]")) {
-				// System.out.println("CLASSIFIED INTO DESCRIPTION");
-				// }
-				name_number++;
-
-				System.out.println("EXTRA INFORMATION ADD (y/n)"); // 可选的额外信息
-				String input_choice = sca.nextLine();
-				if (input_choice.equals("y")) {
-					set_extra_information(name);
-					System.out.println("EXTRA INFORMATION HAS ALREADY BEEN SET");
-				} else {
-					System.out.println("EXTRA INFORMATION HAS NOT BEEN SET");
+				if (temp.equals("back")) {
 					return;
 				}
-			} else {
-				System.out.println("ALREADY EXISTED");
+				String name = temp;
+				if (!name_list.contains(name)) {
+					name_list.add(name);
+					System.out.print("INFORMATION ");
+					String information = sca.nextLine();
+					name_informations.put(name, information);
+
+					friend_map.put(name, new Friend(name)); // 这一步很关键,形成了依赖关系
+
+					if (information.matches("\\d+")) { // 可以自动识别用户输入的信息是电话号码还是邮箱
+						System.out.println("CLASSIFIED INTO PHONE NUMBER");
+					} else if (information.matches("[\\w\\.]+@[\\w\\.]+\\.\\w+")) {
+						System.out.println("CLASSIFIED INTO E-MAIL");
+					} else {
+						System.out.println("UNCLASSIFIED");
+					}
+
+					name_number++;
+
+					System.out.println("EXTRA INFORMATION ADD (y/n)"); // 可选的额外信息
+					String input_choice = sca.nextLine();
+					if (input_choice.equals("y")) {
+						set_extra_information(name);
+						System.out.println("EXTRA INFORMATION HAS ALREADY BEEN SET");
+					} else {
+						System.out.println("EXTRA INFORMATION HAS NOT BEEN SET");
+					}
+
+				} else {
+					System.out.println("ALREADY EXISTED");
+				}
 			}
 		} else {
 			System.out.println("ALREADY SHUTDOWN");
@@ -166,7 +186,7 @@ public class Me_book {
 
 	void show_all() {
 		if (isOpen) {
-			System.out.println("====================");
+			System.out.println("======================");
 			Set set = name_informations.entrySet();
 			Iterator it = set.iterator();
 			System.out.println("NAME\tINFORMATION");
@@ -174,7 +194,7 @@ public class Me_book {
 				Map.Entry<String, Integer> me = (Map.Entry<String, Integer>) it.next();
 				System.out.println(me.getKey() + "\t" + me.getValue());
 			}
-			System.out.println("====================");
+			System.out.println("======================");
 		} else {
 			System.out.println("ALREADY SHUTDOWN");
 		}
@@ -185,9 +205,9 @@ public class Me_book {
 			Set set = name_informations.entrySet();
 			Iterator it = set.iterator();
 			while (true) {
-				System.out.println("1.phone_number  2.e-mail");
+				System.out.println("1.phone_number  2.e-mail  3.back");
 				String format = sca.nextLine();
-				System.out.println("====================");
+				System.out.println("======================");
 				if (format.equals("phone_number") || format.equals("1")) {
 					System.out.println("NAME\tPHONE NUMBER");
 					while (it.hasNext()) {
@@ -196,8 +216,7 @@ public class Me_book {
 							System.out.println(me.getKey() + "\t" + me.getValue());
 						}
 					}
-					System.out.println("====================");
-					break;
+					System.out.println("======================");
 				} else if (format.equals("e-mail") || format.equals("2")) {
 					System.out.println("NAME\tE-MAIL");
 					while (it.hasNext()) {
@@ -206,8 +225,9 @@ public class Me_book {
 							System.out.println(me.getKey() + "\t" + me.getValue());
 						}
 					}
-					System.out.println("====================");
-					break;
+					System.out.println("======================");
+				} else if (format.equals("back") || format.equals("3")) {
+					return;
 				} else {
 					System.out.println("NOT FOUND");
 				}
@@ -220,20 +240,19 @@ public class Me_book {
 	void show() {
 		if (isOpen) {
 			while (true) {
-				System.out.println("1.show_single  2.show_all  3.show_format  4.person_number");
+				System.out.println("1.show_single  2.show_all  3.show_format  4.person_number  5.back");
 				String input_show = sca.nextLine();
 				if (input_show.equals("show_single") || input_show.equals("1")) {
 					show_single();
-					break;
 				} else if (input_show.equals("show_all") || input_show.equals("2")) {
 					show_all();
-					break;
 				} else if (input_show.equals("show-format") || input_show.equals("3")) {
 					show_format();
-					break;
 				} else if (input_show.equals("person_number") || input_show.equals("4")) {
 					person_number();
-					break;
+				} else if (input_show.equals("back") || input_show.equals("5")) {
+					System.out.println("ALREADY BACK");
+					return;
 				} else {
 					System.out.println("NOT FOUND");
 				}
@@ -255,18 +274,22 @@ public class Me_book {
 	void put_class() {
 		if (isOpen) {
 			while (true) {
-				System.out.println("1.normal  2.star  3.black_list");
-				String input_class = sca.nextLine();
+				System.out.println("1.normal  2.star  3.black_list  4.back");
+				String temp = sca.nextLine();
+
+				if (temp.equals("help")) {
+					System.out.println("NAME LIST " + name_list);
+					continue;
+				}
+				String input_class = temp;
 				if (input_class.equals("normal") || input_class.equals("1")) {
 					System.out.print("NORMAL FRIEND ADD ");
 					String add_name = sca.nextLine();
 					if (name_list.contains(add_name)) {
 						name_normal.add(add_name);
 						System.out.println("PUT SUCCESS");
-						break;
 					} else {
 						System.out.println("NOT FOUND");
-						break;
 					}
 				} else if (input_class.equals("star") || input_class.equals("2")) {
 					System.out.print("STAR FRIEND ADD ");
@@ -277,11 +300,9 @@ public class Me_book {
 						friend_map.get(add_name).increase(); // 当被put进star好友后，好感度会增加
 
 						System.out.println("PUT SUCCESS");
-						break;
 
 					} else {
 						System.out.println("NOT FOUND");
-						break;
 					}
 				} else if (input_class.equals("black_list") || input_class.equals("3")) {
 					System.out.print("BLACK LIST ADD ");
@@ -292,12 +313,12 @@ public class Me_book {
 						friend_map.get(add_name).decrease(); // 当被put进黑名单后，好感度自然会下降
 
 						System.out.println("PUT SUCCESS");
-						break;
 
 					} else {
 						System.out.println("NOT FOUND");
-						break;
 					}
+				} else if (input_class.equals("back") || input_class.equals("4")) {
+					return;
 				} else {
 					System.out.println("NOT FOUND");
 				}
@@ -307,95 +328,120 @@ public class Me_book {
 		}
 	}
 
-	void set_class(String name) { // 这是比较难的部分，因为不仅要在新的列表中添加元素还要在原来的类标中删除相应的元素这就要获取相应元素的下标
-		System.out.println("1.normal  2.star  3.black_list");
-		String input_class = sca.nextLine();
-		if (input_class.equals("normal") || input_class.equals("1")) {
-			if (name_list.contains(name)) {
-				if (!name_normal.contains(name)) {
-					name_normal.add(name);
-					System.out.println("SET SUCCESS");
-					if (name_star.contains(name)) {
-						name_star.remove(name_star.indexOf(name));
-					} else if (name_black_list.contains(name)) {
-						name_black_list.remove(name_black_list.indexOf(name));
-					} else {
-						System.out.println("SHIT");
-					}
-				} else {
-					System.out.println("ALREADY EXISTED");
+	void set_class(String name) {
+		if (isOpen) {
+			while (true) {
+				System.out.println("1.normal  2.star  3.black_list  4.back");
+				String temp = sca.nextLine();
+
+				if (temp.equals("help")) {
+					System.out.println("NAME LIST " + name_list);
+					continue;
 				}
 
-			} else {
-				System.out.println("NOT FOUND");
-			}
-		} else if (input_class.equals("star") || input_class.equals("2")) {
-			if (name_list.contains(name)) {
-				if (!name_star.contains(name)) {
-					name_star.add(name);
-					System.out.println("SET SUCCESS");
-					friend_map.get(name).increase(); // 当被put进star好友后，好感度会增加
-					if (name_normal.contains(name)) {
-						name_normal.remove(name_normal.indexOf(name));
-					} else if (name_black_list.contains(name)) {
-						name_black_list.remove(name_black_list.indexOf(name));
-					} else {
-						System.out.println("SHIT");
-					}
-				} else {
-					System.out.println("ALREADY EXISTED");
-				}
-			} else {
-				System.out.println("NOT FOUND");
-			}
-		} else if (input_class.equals("black_list") || input_class.equals("3")) {
-			if (name_list.contains(name)) {
-				if (!name_black_list.contains(name)) {
-					name_black_list.add(name);
-					System.out.println("SET SUCCESS");
-					friend_map.get(name).decrease(); // 当被put进黑名单后，好感度自然会下降
-					if (name_star.contains(name)) {
-						name_star.remove(name_star.indexOf(name));
-					} else if (name_normal.contains(name)) {
-						name_normal.remove(name_normal.indexOf(name));
-					} else {
-						System.out.println("SHIT");
-					}
-				} else {
-					System.out.println("ALREADY EXISTED");
-				}
+				String input_class = temp;
+				if (input_class.equals("normal") || input_class.equals("1")) {
+					if (name_list.contains(name)) {
+						if (!name_normal.contains(name)) {
+							name_normal.add(name);
+							System.out.println("SET SUCCESS");
+							if (name_star.contains(name)) {
+								name_star.remove(name_star.indexOf(name));
+							} else if (name_black_list.contains(name)) {
+								name_black_list.remove(name_black_list.indexOf(name));
+							} else {
+								System.out.println("SHIT");
+							}
+						} else {
+							System.out.println("ALREADY EXISTED");
+						}
 
-			} else {
-				System.out.println("NOT FOUND");
+					} else {
+						System.out.println("NOT FOUND");
+					}
+				} else if (input_class.equals("star") || input_class.equals("2")) {
+					if (name_list.contains(name)) {
+						if (!name_star.contains(name)) {
+							name_star.add(name);
+							System.out.println("SET SUCCESS");
+							friend_map.get(name).increase(); // 当被put进star好友后，好感度会增加
+							if (name_normal.contains(name)) {
+								name_normal.remove(name_normal.indexOf(name));
+							} else if (name_black_list.contains(name)) {
+								name_black_list.remove(name_black_list.indexOf(name));
+							} else {
+								System.out.println("SHIT");
+							}
+						} else {
+							System.out.println("ALREADY EXISTED");
+						}
+					} else {
+						System.out.println("NOT FOUND");
+					}
+				} else if (input_class.equals("black_list") || input_class.equals("3")) {
+					if (name_list.contains(name)) {
+						if (!name_black_list.contains(name)) {
+							name_black_list.add(name);
+							System.out.println("SET SUCCESS");
+							friend_map.get(name).decrease(); // 当被put进黑名单后，好感度自然会下降
+							if (name_star.contains(name)) {
+								name_star.remove(name_star.indexOf(name));
+							} else if (name_normal.contains(name)) {
+								name_normal.remove(name_normal.indexOf(name));
+							} else {
+								System.out.println("SHIT");
+							}
+						} else {
+							System.out.println("ALREADY EXISTED");
+						}
+
+					} else {
+						System.out.println("NOT FOUND");
+					}
+				} else if (input_class.equals("back") || input_class.equals("4")) {
+					return;
+				} else {
+					System.out.println("NOT FOUND");
+				}
 			}
 		} else {
-			System.out.println("NOT FOUND");
+			System.out.println("ALREADY SHUTDOWN");
 		}
-
 	}
 
 	void show_class() {
-		System.out.println("1.normal  2.star  3.black_list");
-		String input_class = sca.nextLine();
-		if (input_class.equals("normal") || input_class.equals("1")) {
-			if (name_normal.size() != 0) {
-				System.out.println(name_normal);
-			} else {
-				System.out.println("NOT FOUND");
-			}
+		if (isOpen) {
+			while (true) {
+				System.out.println("1.normal  2.star  3.black_list  4.back");
+				String input_class = sca.nextLine();
+				if (input_class.equals("normal") || input_class.equals("1")) {
+					if (name_normal.size() != 0) {
+						System.out.println(name_normal);
+					} else {
+						System.out.println("NOT FOUND");
+					}
 
-		} else if (input_class.equals("star") || input_class.equals("2")) {
-			if (name_star.size() != 0) {
-				System.out.println(name_star);
-			} else {
-				System.out.println("NOT FOUND");
+				} else if (input_class.equals("star") || input_class.equals("2")) {
+					if (name_star.size() != 0) {
+						System.out.println(name_star);
+					} else {
+						System.out.println("NOT FOUND");
+					}
+				} else if (input_class.equals("black") || input_class.equals("3")) {
+					if (name_black_list.size() != 0) {
+						System.out.println(name_black_list);
+					} else {
+						System.out.println("NOT FOUND");
+					}
+				} else if (input_class.equals("back") || input_class.equals("4")) {
+					System.out.println("ALREADY BACK");
+					return;
+				} else {
+					System.out.println("NOT FOUND");
+				}
 			}
-		} else if (input_class.equals("black") || input_class.equals("3")) {
-			if (name_black_list.size() != 0) {
-				System.out.println(name_black_list);
-			} else {
-				System.out.println("NOT FOUND");
-			}
+		} else {
+			System.out.println("ALREADY SHUTDOWN");
 		}
 	}
 
@@ -446,14 +492,15 @@ public class Me_book {
 	void set() { // 封装，将来两个set方法进行封装(在非ANM模式下的set方法只能访问basic_information基本信息)
 		if (isOpen) {
 			while (true) {
-				System.out.println("1.set_information  2.set_password");
+				System.out.println("1.set_information  2.set_password  3.back");
 				String input = sca.nextLine();
 				if (input.equals("set_information") || input.equals("1")) {
 					set_information();
-					break;
 				} else if (input.equals("set_password") || input.equals("2")) {
 					set_password();
-					break;
+				} else if (input.equals("back") || input.equals("3")) {
+					System.out.println("ALREADY BACK");
+					return;
 				} else {
 					System.out.println("NOT FOUND");
 				}
@@ -563,23 +610,21 @@ public class Me_book {
 	void social() {
 		if (isOpen) {
 			while (true) {
-				System.out.println("1.put_class  2.show_class  3.hug  4.beat  5.personal_information");
+				System.out.println("1.put_class  2.show_class  3.hug  4.beat  5.personal_information  6.back");
 				String input_social = sca.nextLine();
 				if (input_social.equals("put_class") || input_social.equals("1")) {
 					put_class();
-					break;
 				} else if (input_social.equals("show_class") || input_social.equals("2")) {
 					show_class();
-					break;
 				} else if (input_social.equals("hug") || input_social.equals("3")) {
 					hug();
-					break;
 				} else if (input_social.equals("beat") || input_social.equals("4")) {
 					beat();
-					break;
 				} else if (input_social.equals("personal_information") || input_social.equals("5")) {
 					personal_information();
-					break;
+				} else if (input_social.equals("back") || input_social.equals("6")) {
+					System.out.println("ALREADY BACK");
+					return;
 				} else {
 					System.out.println("NOT FOUND");
 				}
@@ -590,50 +635,75 @@ public class Me_book {
 	}
 
 	void show_ANM(String name) {
-		System.out.println("1.show_basic_information  2.show_personal_information  3.show_class");
-		String input_ANM = sca.nextLine();
-		if (input_ANM.equals("show_basic_information") || input_ANM.equals("1")) {
-			show_single(name);
-		} else if (input_ANM.equals("show_personal_information") || input_ANM.equals("2")) {
-			friend_map.get(name).personal_information();
-		} else if (input_ANM.equals("show_class") || input_ANM.equals("3")) {
-			if (name_normal.contains(name)) {
-				System.out.println("NORMAL FRIEND");
-			} else if (name_star.contains(name)) {
-				System.out.println("STAR FRIEND");
-			} else if (name_black_list.contains(name)) {
-				System.out.println("BLACK LIST RELAIONSHIP");
+		if (isOpen) {
+			while (true) {
+				System.out.println("1.show_basic_information  2.show_personal_information  3.show_class  4.back");
+				String input_ANM = sca.nextLine();
+				if (input_ANM.equals("show_basic_information") || input_ANM.equals("1")) {
+					show_single(name);
+				} else if (input_ANM.equals("show_personal_information") || input_ANM.equals("2")) {
+					friend_map.get(name).personal_information();
+				} else if (input_ANM.equals("show_class") || input_ANM.equals("3")) {
+					if (name_normal.contains(name)) {
+						System.out.println("NORMAL FRIEND");
+					} else if (name_star.contains(name)) {
+						System.out.println("STAR FRIEND");
+					} else if (name_black_list.contains(name)) {
+						System.out.println("BLACK LIST RELAIONSHIP");
+					}
+				} else if (input_ANM.equals("back") || input_ANM.equals("4")) {
+					System.out.println("ALREADY BACK");
+					return;
+				} else {
+					System.out.println("NOT FOUND");
+				}
 			}
 		} else {
-			System.out.println("NOT FOUND");
+			System.out.println("ALREADY SHUTDOWN");
 		}
 	}
 
 	void set_ANM(String name) {
-		System.out.print("1.set_basic_information  2.set_personal_information  3.set_class");
-		String input_ANM = sca.nextLine();
-		if (input_ANM.equals("set_basic_information") || input_ANM.equals("1")) {
-			set_information(name);
-		} else if (input_ANM.equals("set_personal_information") || input_ANM.equals("2")) {
-			set_extra_information(name);
-		} else if (input_ANM.equals("set_class") || input_ANM.equals("3")) {
-			set_class(name);
+		if (isOpen) {
+			while (true) {
+				System.out.print("1.set_basic_information  2.set_personal_information  3.set_class  4.back");
+				String input_ANM = sca.nextLine();
+				if (input_ANM.equals("set_basic_information") || input_ANM.equals("1")) {
+					set_information(name);
+				} else if (input_ANM.equals("set_personal_information") || input_ANM.equals("2")) {
+					set_extra_information(name);
+				} else if (input_ANM.equals("set_class") || input_ANM.equals("3")) {
+					set_class(name);
+				} else if (input_ANM.equals("back") || input_ANM.equals("4")) {
+					System.out.println("ALREADY BACK");
+					return;
+				} else {
+					System.out.println("NOT FOUND");
+				}
+			}
 		} else {
-			System.out.println("NOT FOUND");
+			System.out.println("ALREADY SHUTDOWN");
 		}
 	}
 
 	void social_ANM(String name) {
-		System.out.println("1.hug  2.beat  3.one_sentence_evaluation"); // one_sentence_evaluation只有在ANM模式下才能看见
-		String input_ANM = sca.nextLine();
-		if (input_ANM.equals("hug") || input_ANM.equals("1")) {
-			hug(name);
-		} else if (input_ANM.equals("beat") || input_ANM.equals("2")) {
-			beat(name);
-		} else if (input_ANM.equals("one_sentence_evaluation") || input_ANM.equals("3")) {
-			one_sentence_evaluation(name);
+		if (isOpen) {
+			System.out.println("1.hug  2.beat  3.one_sentence_evaluation  4.back"); // one_sentence_evaluation只有在ANM模式下才能看见
+			String input_ANM = sca.nextLine();
+			if (input_ANM.equals("hug") || input_ANM.equals("1")) {
+				hug(name);
+			} else if (input_ANM.equals("beat") || input_ANM.equals("2")) {
+				beat(name);
+			} else if (input_ANM.equals("one_sentence_evaluation") || input_ANM.equals("3")) {
+				one_sentence_evaluation(name);
+			} else if (input_ANM.equals("back") || input_ANM.equals("4")) {
+				System.out.println("ALREADY BACK");
+				return;
+			} else {
+				System.out.println("NOT FOUND");
+			}
 		} else {
-			System.out.println("NOT FOUND");
+			System.out.println("ALREADY SHUTDOWN");
 		}
 	}
 
@@ -641,47 +711,50 @@ public class Me_book {
 									// ANM模式拥有更大的访问权限，可以访问私人信息并且用户能够在ANM模式下对相应的Friend进行一句话描述（是Friend对象的属性字段）
 
 		if (isOpen) {
-			while (true) {
-				System.out.print("ANM START\nANM NAME ");
-				String name = sca.nextLine();
+			System.out.println("ENTER ANM (y/n)");
+			String confirm = sca.nextLine();
+			if (confirm.equals("y")) {
 				while (true) {
-					if (name_list.contains(name)) {
-						System.out.println("1.show  2.set  3.soclal");
-						String input_choice = sca.nextLine();
-						if (input_choice.equals("show") || input_choice.equals("1")) {
-							show_ANM(name);
-						} else if (input_choice.equals("set") || input_choice.equals("2")) {
-							set_ANM(name);
-						} else if (input_choice.equals("social") || input_choice.equals("3")) {
-							social_ANM(name);
-						}
-						System.out.println("KILL ANM FOR THIS FRIEND (y/n)");
-						String progress_ANM_this = sca.nextLine();
-						if (progress_ANM_this.equals("y")) {
-							System.out.println("ANM FOR THIS FRIEND ALREADY KILLED");
-							break;
-						} else if (progress_ANM_this.equals("n")) {
-							System.out.println("ANM IS STILL RUNNING");
+					System.out.print("ANM START\nANM NAME ");
+					String name = sca.nextLine();
+					while (true) {
+						if (name_list.contains(name)) {
+							System.out.println("1.show  2.set  3.social  4.back");
+							String input_choice = sca.nextLine();
+							if (input_choice.equals("show") || input_choice.equals("1")) {
+								show_ANM(name);
+							} else if (input_choice.equals("set") || input_choice.equals("2")) {
+								set_ANM(name);
+							} else if (input_choice.equals("social") || input_choice.equals("3")) {
+								social_ANM(name);
+							} else if (input_choice.equals("back") || input_choice.equals("4")) {
+								System.out.println(name.toUpperCase() + " HAS BEEN KILLED");
+								break;
+							}
 						} else {
-							System.out.println("NOT FOUND STILL RUNNING");
+							System.out.print("NOT FOUND\nHINT NAME LIST " + name_list + "\n(NEW) NAME");
+							String new_name = sca.nextLine();
+							name = new_name;
 						}
+					}
+					System.out.print("KILL ANM (y/n)");
+					String progress_ANM = sca.nextLine();
+					if (progress_ANM.equals("y")) {
+						System.out.println("ANM ALREADY KILLED");
+						return;
+					} else if (progress_ANM.equals("n")) {
+						System.out.println("ANM IS STILL RUNNING");
 					} else {
-						System.out.println("NOT FOUND\n(NEW) ANM NAME");
-						String new_name = sca.nextLine();
-						new_name = name;
+						System.out.println("NOT FOUND STILL RUNNING");
 					}
 				}
-				System.out.print("KILL ANM (y/n)");
-				String progress_ANM = sca.nextLine();
-				if (progress_ANM.equals("y")) {
-					System.out.println("ANM ALREADY KILLED");
-					return;
-				} else if (progress_ANM.equals("n")) {
-					System.out.println("ANM IS STILL RUNNING");
-				} else {
-					System.out.println("NOT FOUND STILL RUNNING");
-				}
+			} else if (confirm.equals("n")) {
+				System.out.println("ANM DID NOT START");
+				return;
+			} else {
+				System.out.println("NOT FOUND");
 			}
+
 		} else {
 			System.out.println("ALREADY SHUTDOWN");
 		}
@@ -691,6 +764,7 @@ public class Me_book {
 		System.out.println(
 				"\t\t\t\t\tMEBOOK\n\"help\" for more assistance\n=============================================");
 		while (true) {
+			System.out.print("MAIN DASHBOARD\nORDER ");
 			String order = sca.nextLine();
 			if (order.equals("ANM") || order.equals("0")) {
 				me_book.according_name_mode();

@@ -97,8 +97,4 @@ public class Friend {
 		}
 	}
 
-	public static void main(String[] args) {
-		new Friend("Albert").personal_information();
-	}
-
 }
