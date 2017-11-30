@@ -1,13 +1,14 @@
 //MeBook可以用来存放和姓名相关的一组信息（比如电话号码或者是邮箱～～）
 //Me_book基本的功能是用来存储friend的联系方式，并将其自动分类；当然，就像所有手机的通讯录不仅仅是通讯录这么简单，还可以通过访问Me_book的内置方法来索取索取联系人的详细信息，或者设置比如为其设置一个nickname
 //两个类的联系是name
-//当Me_book列出1.2.3.4.5之类的选项，如果用户没有输入可选择的选项，Me_book会自动进入循环，知道用户输入正确的指令
+//当Me_book列出1.2.3.4.5之类的选项，如果用户没有输入可选择的选项，Me_book会自动进入循环，直到用户输入正确的指令
+//在每一层菜单都设置了back选项以返回上一层菜单
 package me_book;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.Iterator; //迭代器，用于遍历容器
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
@@ -18,7 +19,7 @@ public class Me_book {
 	private boolean isOpen = false;
 	private int name_number;
 	private String password = ""; // 初始化密码为空字符串
-	private ArrayList<String> name_list = new ArrayList();
+	private ArrayList<String> name_list = new ArrayList(); // 这是查找的关键，所有的查找都要先在name_list这里过关
 	private ArrayList<String> name_normal = new ArrayList();
 	private ArrayList<String> name_star = new ArrayList();
 	private ArrayList<String> name_black_list = new ArrayList();
@@ -97,48 +98,17 @@ public class Me_book {
 		}
 	}
 
-	void add() {
+	void add_remove() {
 		if (isOpen) {
 			while (true) {
-				System.out.print("NAME ");
-				String temp = sca.nextLine();
-				if (temp.equals("help")) {
-					System.out.println("\"back\" TO BACKWARD DASHBOARD");
-					continue;
-				}
-				if (temp.equals("back")) {
+				System.out.println("1.add  2.remove  3.back");
+				String input = sca.nextLine();
+				if (input.equals("add") || input.equals("1")) {
+					add(); // 封装
+				} else if (input.equals("remove") || input.equals("2")) {
+					remove();
+				} else if (input.equals("back") || input.equals("3")) {
 					return;
-				}
-				String name = temp;
-				if (!name_list.contains(name)) {
-					name_list.add(name);
-					System.out.print("INFORMATION ");
-					String information = sca.nextLine();
-					name_informations.put(name, information);
-
-					friend_map.put(name, new Friend(name)); // 这一步很关键,形成了依赖关系
-
-					if (information.matches("\\d+")) { // 可以自动识别用户输入的信息是电话号码还是邮箱
-						System.out.println("CLASSIFIED INTO PHONE NUMBER");
-					} else if (information.matches("[\\w\\.]+@[\\w\\.]+\\.\\w+")) {
-						System.out.println("CLASSIFIED INTO E-MAIL");
-					} else {
-						System.out.println("UNCLASSIFIED");
-					}
-
-					name_number++;
-
-					System.out.println("EXTRA INFORMATION ADD (y/n)"); // 可选的额外信息
-					String input_choice = sca.nextLine();
-					if (input_choice.equals("y")) {
-						set_extra_information(name);
-						System.out.println("EXTRA INFORMATION HAS ALREADY BEEN SET");
-					} else {
-						System.out.println("EXTRA INFORMATION HAS NOT BEEN SET");
-					}
-
-				} else {
-					System.out.println("ALREADY EXISTED");
 				}
 			}
 		} else {
@@ -146,20 +116,111 @@ public class Me_book {
 		}
 	}
 
+	public void add() {
+		while (true) {
+			System.out.print("NAME ");
+			String temp = sca.nextLine();
+			if (temp.equals("help")) {
+				System.out.println("\"back\" TO BACKWARD DASHBOARD");
+				continue;
+			}
+			if (temp.equals("back")) {
+				return;
+			}
+			String name = temp;
+			if (!name_list.contains(name)) {
+				name_list.add(name);
+				System.out.print("INFORMATION ");
+				String information = sca.nextLine();
+				name_informations.put(name, information);
+
+				friend_map.put(name, new Friend(name)); // 这一步很关键,形成了依赖关系
+
+				if (information.matches("\\d+")) { // 可以自动识别用户输入的信息是电话号码还是邮箱
+					System.out.println("CLASSIFIED INTO PHONE NUMBER");
+				} else if (information.matches("[\\w\\.]+@[\\w\\.]+\\.\\w+")) {
+					System.out.println("CLASSIFIED INTO E-MAIL");
+				} else {
+					System.out.println("UNCLASSIFIED");
+				}
+
+				name_number++;
+
+				System.out.println("EXTRA INFORMATION ADD (y/n)"); // 可选的额外信息
+				String input_choice = sca.nextLine();
+				if (input_choice.equals("y")) {
+					set_extra_information(name);
+					System.out.println("EXTRA INFORMATION HAS ALREADY BEEN SET");
+				} else {
+					System.out.println("EXTRA INFORMATION HAS NOT BEEN SET");
+				}
+
+			} else {
+				System.out.println("ALREADY EXISTED");
+			}
+		}
+	}
+
+	void remove() {
+		System.out.println("");
+		while (true) {
+			System.out.println("NAME ");
+			String temp = sca.nextLine();
+			if (temp.equals("help")) {
+				System.out.println("\"back\" TO BACKWARD DASHBOARD");
+				continue;
+			}
+			if (temp.equals("back")) {
+				return;
+			}
+			String name = temp;
+			if (name_list.contains(name)) {
+				name_list.remove(name);
+
+				for (int i = 0; i < name_normal.size(); ++i) {
+					if (name_normal.contains(name)) {
+						name_normal.remove(name);
+					}
+				}
+				for (int i = 0; i < name_star.size(); ++i) {
+					if (name_star.contains(name)) {
+						name_star.remove(name);
+					}
+				}
+				for (int i = 0; i < name_black_list.size(); ++i) {
+					if (name_black_list.contains(name)) {
+						name_black_list.remove(name);
+					}
+				}
+				System.out.println("ALREADY REMOVED");
+			} else {
+				System.out.println("NOT EXIST");
+			}
+		}
+	}
+
 	void show_single() {
 		if (isOpen) {
-			System.out.println("PLEASE ENTER NAME ");
-			String chosen_name = sca.nextLine();
-			try {
-				if (name_informations.get(chosen_name).matches("\\d+")) {
-					System.out.println("His/her phone number is " + name_informations.get(chosen_name));
-				} else if (name_informations.get(chosen_name).matches("[\\w\\.]+@[\\w\\.]+\\.\\w+")) {
-					System.out.println("His/her e-mail is " + name_informations.get(chosen_name));
-				} else {
-					System.out.println("His/her information is" + name_informations.get(chosen_name));
+			while (true) {
+				System.out.println("PLEASE ENTER NAME ");
+				String chosen_name = sca.nextLine();
+
+				if (chosen_name.equals("back")) {
+					System.out.println("ALREADY BACK");
+					return;
 				}
-			} catch (Exception e) {
-				System.out.println("NOT FOUND");
+
+				try {
+					if (name_informations.get(chosen_name).matches("\\d+")) {
+						System.out.println("His/her phone number is " + name_informations.get(chosen_name));
+					} else if (name_informations.get(chosen_name).matches("[\\w\\.]+@[\\w\\.]+\\.\\w+")) {
+						System.out.println("His/her e-mail is " + name_informations.get(chosen_name));
+					} else {
+						System.out.println("His/her information is" + name_informations.get(chosen_name));
+					}
+				} catch (Exception e) {
+					System.out.println("NOT FOUND");
+				}
 			}
 		} else {
 			System.out.println("ALREADY SHUTDOWN");
@@ -772,8 +833,8 @@ public class Me_book {
 				me_book.launch();
 			} else if (order.equals("shutdown") || order.equals("2")) {
 				me_book.shutdown();
-			} else if (order.equals("add") || order.equals("3")) {
-				me_book.add();
+			} else if (order.equals("add && remove") || order.equals("3")) {
+				me_book.add_remove();
 			} else if (order.equals("show") || order.equals("4")) {
 				me_book.show();
 			} else if (order.equals("set") || order.equals("5")) {
@@ -781,7 +842,7 @@ public class Me_book {
 			} else if (order.equals("social") || order.equals("6")) {
 				me_book.social();
 			} else if (order.equals("help")) {
-				System.out.println("0.ANM  1.launch  2.shutdown  3.add  4.show  5.set  6.social"); // 只有ANM模式是循环模式，当且仅当退出当前好友后才能退出ANM模式（用名字进行检索）
+				System.out.println("0.ANM  1.launch  2.shutdown  3.add && remove  4.show  5.set  6.social"); // 只有ANM模式是循环模式，当且仅当退出当前好友后才能退出ANM模式（用名字进行检索）
 			} else {
 				System.out.println("NOT FOUND");
 			}
